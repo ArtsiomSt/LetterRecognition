@@ -5,8 +5,8 @@ import math
 import random
 
 
-base_dir = 'C:\\Users\\arteo\\Desktop\\Fnt\\'
-to_dir = 'C:\\Users\\arteo\\Desktop\\NewTrainValidTest'
+base_dir = 'path to dir with raw data'
+to_dir = 'Path to train dir'
 
 # symbol = os.path.join(base_dir, 'Sample001\\48-0.png')
 test_p = 0.15
