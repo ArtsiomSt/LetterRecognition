@@ -1,11 +1,11 @@
 import os
 import string
 
-# base_dir = 'C:\\Users\\arteo\\Desktop\\Fnt\\'
-#
+
+# base_dir = ' '
 # new_dir = 'C:\\Users\\arteo\\PycharmProjects\\TensorFlow\\'
 # with open(os.path.join(base_dir, 'test.txt'), 'w') as file:
-#     file.write('Hello world\n')
+#     file.write('test')
 
 digits = {string.digits[x]: str(x+48) for x in range(10)}
 
