@@ -2,7 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.views import View
 from .mixins import LoginRequiredRedirectMixin
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword
+from .models import UserProfile
 
 
 class HomePageView(LoginRequiredRedirectMixin, View):
@@ -42,7 +43,8 @@ class RegisterView(View):
     def post(self, request):
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            UserProfile.objects.create(user=user)
             return redirect('/signin/?message=Success')
         return redirect('/signup/?message=Invaliddata')
 
@@ -51,3 +53,61 @@ def logout_user(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect('signin')
+
+
+class ProfileView(LoginRequiredRedirectMixin, View):
+    def get(self, request):
+        import random
+        cur_user = UserProfile.objects.select_related().get(user=request.user)
+        form = SetNewPassword(cur_user.user)
+        user_data = {
+            'Username': cur_user.user.username,
+            'First name': cur_user.user.first_name if cur_user.user.first_name else 'Empty',
+            'Last name': cur_user.user.last_name if cur_user.user.first_name else 'Empty',
+            'Email': cur_user.user.email if cur_user.user.first_name else 'Empty',
+            'Password': ''.join(['*' for x in range(0, random.randrange(5, 10))])
+        }
+        context = {
+            'user_data': user_data,
+            'title': 'Profile',
+        }
+        if request.GET.get('chps') == 'true':
+            context['form'] = form
+        return render(request, 'userint/profile.html', context)
+
+    def post(self, request):
+        cur_user = UserProfile.objects.select_related().get(user=request.user)
+        form = SetNewPassword(user=cur_user.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+        return redirect('profile')
+
+
+class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
+    def get(self, request):
+        cur_user = UserProfile.objects.select_related().get(user=request.user)
+        user_data = {
+            'username': cur_user.user.username,
+            'first_name': cur_user.user.first_name if cur_user.user.first_name else 'Empty',
+            'last_name': cur_user.user.last_name if cur_user.user.first_name else 'Empty',
+            'email': cur_user.user.email if cur_user.user.first_name else 'Empty',
+        }
+        user_data_change_form = ChangeUserProfileDataForm(initial=user_data)
+        context = {
+            'change_form': user_data_change_form,
+            'title': 'ChangeProfile',
+        }
+        return render(request, 'userint/changeprofile.html', context)
+
+    def post(self, request):
+        cur_user = UserProfile.objects.select_related().get(user=request.user)
+        user_data_change_form = ChangeUserProfileDataForm(request.POST)
+        if user_data_change_form.is_valid():
+            cur_user.user.first_name = user_data_change_form.cleaned_data.get('first_name')
+            cur_user.user.last_name = user_data_change_form.cleaned_data.get('last_name')
+            cur_user.user.email = user_data_change_form.cleaned_data.get('email')
+            cur_user.user.username = user_data_change_form.cleaned_data.get('username')
+            cur_user.user.save()
+            cur_user.save()
+        return redirect('profile')
