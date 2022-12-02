@@ -16,16 +16,17 @@ class HomePageView(LoginRequiredRedirectMixin, View):
         return render(request, 'userint/homepage.html', context=context)
 
     def post(self, request):
-        form = AddPictureForRecogintionForm(data=request.POST, files=request.FILES)
+        form = AddPictureForRecogintionForm(request.POST, request.FILES)
         if form.is_valid():
-            current_picture = PictureForRecongition.objects.create(user=request.user,
-                                                                   picture_file=form.cleaned_data['picture_file'])
+            print('yes')
+            current_picture = PictureForRecongition.objects.create(made_by_user=UserProfile.objects.get(user=request.user),
+                                                                       picture_file=form.cleaned_data['picture_file'])
             context = {
                 'title': 'Homepage',
                 'current_picture': current_picture,
             }
             return render(request, 'userint/homepage.html', context=context)
-        return redirect('/?ErrorOccured')
+        return redirect('/?Error')
 
 
 class LoginView(View):
@@ -128,3 +129,4 @@ class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
             cur_user.user.save()
             cur_user.save()
         return redirect('profile')
+
