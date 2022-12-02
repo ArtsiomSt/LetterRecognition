@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from converter.settings import DEBUG, MEDIA_URL, MEDIA_ROOT
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -10,3 +12,6 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('changeprofile/', ChangeProfileDataView.as_view(), name='changep'),
 ]
+
+if DEBUG:
+    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

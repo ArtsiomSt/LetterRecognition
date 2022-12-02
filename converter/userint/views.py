@@ -2,13 +2,30 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.views import View
 from .mixins import LoginRequiredRedirectMixin
-from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword
-from .models import UserProfile
+from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword, AddPictureForRecogintionForm
+from .models import UserProfile, PictureForRecongition
 
 
 class HomePageView(LoginRequiredRedirectMixin, View):
     def get(self, request):
-        return render(request, 'userint/homepage.html', context={'title': 'Home'})
+        form = AddPictureForRecogintionForm()
+        context = {
+            'form': form,
+            'title': 'Homepage'
+        }
+        return render(request, 'userint/homepage.html', context=context)
+
+    def post(self, request):
+        form = AddPictureForRecogintionForm(data=request.POST, files=request.FILES)
+        if form.is_valid():
+            current_picture = PictureForRecongition.objects.create(user=request.user,
+                                                                   picture_file=form.cleaned_data['picture_file'])
+            context = {
+                'title': 'Homepage',
+                'current_picture': current_picture,
+            }
+            return render(request, 'userint/homepage.html', context=context)
+        return redirect('/?ErrorOccured')
 
 
 class LoginView(View):
