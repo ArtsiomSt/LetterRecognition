@@ -3,6 +3,8 @@ from neiro_predict import prediction
 import keras
 from rename_fnt import res, res_dir
 
+# Functions for predicting text
+
 
 model = keras.models.load_model('letter_rec.h5')
 
