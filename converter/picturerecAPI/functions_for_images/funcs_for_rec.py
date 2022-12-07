@@ -8,7 +8,7 @@ import os
 model = load_model('letter_rec_new_v5.h5')
 
 
-def get_picc(impath):
+def get_picc(impath): # outdated function
     out_size = 32
     image_file = f"{impath}"
     img = cv2.imread(image_file)
@@ -51,21 +51,26 @@ def get_letters_from_picture(img):
             counter += 1
             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
             letter_crop = img_copy[y:y + h, x:x + w]
-            letters.append((x, y, cv2.resize(letter_crop, (out_size, out_size))))
+            letters.append((x, w, cv2.resize(letter_crop, (out_size, out_size))))
     letters.sort(key=lambda x: x[0])
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
     return letters, img
 
 
 def array_of_letters_to_str(letters):
     predicted = []
     list_of_letters = []
-    for pic in letters:
-        pred = prediction(pic[2], model)
+    x_prev = w_prev = None
+    avg_width = sum(map(lambda x: x[1], letters))/len(letters)
+    print(avg_width)
+    for letter in letters:
+        if all((x_prev, w_prev)) and letter[0]-(x_prev+w_prev) > avg_width/3:
+            list_of_letters.append(' ')
+        if all((x_prev, w_prev)):
+            print(letter[0]-(x_prev+w_prev))
+        pred = prediction(letter[2], model)
         predicted.append(pred)
         list_of_letters.append(res_dir[pred+10])
-    print(predicted)
+        x_prev, w_prev = letter[0], letter[1]
     return list_of_letters
 
 
@@ -83,5 +88,5 @@ def letters_to_file(letters):
     return
 
 
-def get_text_from_picture(img):
-    letters = get_letters_from_picture(img)
+def get_text_from_picture(img): # function that will give text direcly from image, without other info
+    pass

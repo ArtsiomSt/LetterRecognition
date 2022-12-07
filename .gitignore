@@ -1,3 +1,5 @@
 venv
 main.py
 .idea
+Recognition/__pycache__/
+Recognition/temp_files/

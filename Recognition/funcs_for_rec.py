@@ -26,8 +26,8 @@ def get_picc(impath):
             print(cv2.contourArea(item))
             letters.append((x, y, cv2.resize(letter_crop, (out_size, out_size))))
     letters.sort(key=lambda x: x[0])
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
+    # cv2.imshow('img', img)
+    # cv2.waitKey(0)
     return letters
 
 
@@ -53,12 +53,12 @@ def get_letters_from_picture(img):
             letter_crop = img_copy[y:y + h, x:x + w]
             letters.append((x, y, cv2.resize(letter_crop, (out_size, out_size))))
     letters.sort(key=lambda x: x[0])
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    return letters
+    # cv2.imshow('img', img)
+    # cv2.waitKey(0)
+    return letters, img
 
 
-def pics_to_str(letters):
+def array_of_letters_to_str(letters):
     predicted = []
     list_of_letters = []
     for pic in letters:
@@ -69,7 +69,7 @@ def pics_to_str(letters):
     return list_of_letters
 
 
-def pic_to_letter(picture):
+def picture_to_one_letter(picture):
     letter = prediction(picture, model)
     print(letter)
     return res_dir[letter]
@@ -83,5 +83,8 @@ def letters_to_file(letters):
     return
 
 
-letters = get_letters_from_picture(cv2.imread('static/Screenshot_113.png'))
-print(pics_to_str(letters))
+
+letters, img = get_letters_from_picture(cv2.imread('hell.png'))
+print(array_of_letters_to_str(letters))
+cv2.imshow('f', img)
+cv2.waitKey(0)
