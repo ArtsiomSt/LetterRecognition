@@ -1,16 +1,17 @@
-import cv2
-import io
+import numpy as np
 from django.contrib.auth import authenticate, login, logout
+from django.core.files import File
 from django.shortcuts import render, redirect
 from django.views import View
 from .mixins import LoginRequiredRedirectMixin
 from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword, AddPictureForRecogintionForm
 from .models import UserProfile, PictureForRecongition
-from .serializers import PictureSerializer, ImageSerializer
 import requests
-from PIL import Image
-import os
 from converter.settings import MEDIA_ROOT, BASE_DIR
+import base64
+import cv2
+import os
+import io
 
 
 class HomePageView(LoginRequiredRedirectMixin, View):
@@ -25,17 +26,25 @@ class HomePageView(LoginRequiredRedirectMixin, View):
     def post(self, request):
         form = AddPictureForRecogintionForm(request.POST, request.FILES)
         if form.is_valid():
+            print(form.cleaned_data['picture_file'].__class__)
             current_picture = PictureForRecongition.objects.create(
                 made_by_user=UserProfile.objects.get(user=request.user),
                 picture_file=form.cleaned_data['picture_file'])
-            serializer = ImageSerializer({'image': form.cleaned_data['picture_file']})
             media = str(BASE_DIR) + current_picture.picture_file.url.replace('/', '\\')
             url = "http://127.0.0.1:8000/recpicture/api/v1/recognise/"
             payload = {}
-            files = [('image', ('77-10.png', open(media, 'rb'), 'image/png'))]
+            files = [('image', ('recognise.png', open(media, 'rb'), 'image/png'))]
             headers = {}
             resp = requests.request("POST", url, headers=headers, data=payload, files=files)
-            print(resp.json())
+            image_code = resp.json().get('new_img', None)
+            if image_code is not None:
+                image_decode = base64.b64decode(image_code)
+                buffer = io.BytesIO()
+                buffer.write(image_decode)
+                buffer.seek(0)
+                rectangled_image_file = File(buffer, 'image.png')
+                current_picture.rectangled_image = rectangled_image_file
+                current_picture.save()
             context = {
                 'title': 'Homepage',
                 'current_picture': current_picture,
@@ -144,3 +153,4 @@ class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
             cur_user.user.save()
             cur_user.save()
         return redirect('profile')
+

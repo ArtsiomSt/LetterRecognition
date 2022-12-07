@@ -65,8 +65,6 @@ def array_of_letters_to_str(letters):
     for letter in letters:
         if all((x_prev, w_prev)) and letter[0]-(x_prev+w_prev) > avg_width/3:
             list_of_letters.append(' ')
-        if all((x_prev, w_prev)):
-            print(letter[0]-(x_prev+w_prev))
         pred = prediction(letter[2], model)
         predicted.append(pred)
         list_of_letters.append(res_dir[pred+10])
