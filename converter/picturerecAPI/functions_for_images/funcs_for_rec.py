@@ -8,7 +8,7 @@ import os
 model = load_model('letter_rec_new_v5.h5')
 
 
-def get_picc(impath): # outdated function
+def get_picc(impath):  # outdated function
     out_size = 32
     image_file = f"{impath}"
     img = cv2.imread(image_file)
@@ -21,7 +21,7 @@ def get_picc(impath): # outdated function
     for idx, item in enumerate(conts):
         x, y, w, h = cv2.boundingRect(item)
         if hierarchy[0][idx][3] == 0:
-            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
+            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
             letter_crop = img_copy[y:y + h, x:x + w]
             print(cv2.contourArea(item))
             letters.append((x, y, cv2.resize(letter_crop, (out_size, out_size))))
@@ -31,12 +31,14 @@ def get_picc(impath): # outdated function
     return letters
 
 
+#    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 3)
+
 def get_letters_from_picture(img):
     out_size = 32
     img_copy = deepcopy(img)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, img = cv2.threshold(img, 200, 255, cv2.THRESH_BINARY)
-    conts, hier = cv2.findContours(img, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 3)
+    conts, hier = cv2.findContours(thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     counter = 0
     biggest = 0
     letters = []
@@ -44,7 +46,7 @@ def get_letters_from_picture(img):
         if cv2.contourArea(item) > 0.8 * img.shape[0] * img.shape[1]:
             biggest = idx
     areas = list(map(cv2.contourArea, sorted(conts, key=cv2.contourArea)[1:]))
-    avg_area = sum(areas)/(10*len(areas))
+    avg_area = sum(areas) / (10 * len(areas))
     for idx, item in enumerate(conts):
         x, y, w, h = cv2.boundingRect(item)
         if hier[0][idx][3] == biggest and cv2.contourArea(item) > avg_area:
@@ -60,17 +62,19 @@ def array_of_letters_to_str(letters):
     predicted = []
     list_of_letters = []
     x_prev = w_prev = None
-    avg_width = sum(map(lambda x: x[1], letters))/len(letters)
-    print(avg_width)
-    for letter in letters:
-        if all((x_prev, w_prev)) and letter[0]-(x_prev+w_prev) > avg_width/3:
+    avg_width = sum(map(lambda x: x[1], letters)) / len(letters)
+    for i, letter in enumerate(letters):
+        if all((x_prev, w_prev)) and letter[0]-(x_prev+w_prev) > avg_width/4:
             list_of_letters.append(' ')
         pred = prediction(letter[2], model)
         predicted.append(pred)
-        list_of_letters.append(res_dir[pred+10])
+        list_of_letters.append(res_dir[pred + 10])
         x_prev, w_prev = letter[0], letter[1]
     return list_of_letters
 
+
+def sort_letters_by():
+    pass
 
 def picture_to_one_letter(picture):
     letter = prediction(picture, model)
@@ -86,5 +90,5 @@ def letters_to_file(letters):
     return
 
 
-def get_text_from_picture(img): # function that will give text direcly from image, without other info
+def get_text_from_picture(img):  # function that will give text direcly from image, without other info
     pass

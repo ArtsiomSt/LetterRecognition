@@ -13,4 +13,10 @@
 </form>
 {% endif %}
 <img src="{{ current_picture.picture_file.url }}" alt="">
+<hr>
+{% if current_picture.rectangled_image %}
+<img src="{{ current_picture.rectangled_image.url }}" alt="">
+<hr>
+<h3>{{ current_picture.recognised_text }}</h3>
+{% endif %}
 {% endblock  %}

@@ -37,6 +37,7 @@ class HomePageView(LoginRequiredRedirectMixin, View):
             headers = {}
             resp = requests.request("POST", url, headers=headers, data=payload, files=files)
             image_code = resp.json().get('new_img', None)
+            text_from_picture = resp.json().get('letters', None)
             if image_code is not None:
                 image_decode = base64.b64decode(image_code)
                 buffer = io.BytesIO()
@@ -44,7 +45,9 @@ class HomePageView(LoginRequiredRedirectMixin, View):
                 buffer.seek(0)
                 rectangled_image_file = File(buffer, 'image.png')
                 current_picture.rectangled_image = rectangled_image_file
-                current_picture.save()
+            if text_from_picture is not None:
+                current_picture.recognised_text = ''.join(text_from_picture)
+            current_picture.save()
             context = {
                 'title': 'Homepage',
                 'current_picture': current_picture,

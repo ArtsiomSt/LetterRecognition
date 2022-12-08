@@ -19,7 +19,6 @@ class RecognisePictureAPIView(APIView):
         return Response({'answer': "This url is supposed to be giver a picture for recognising text from it. Send picture using POST."})
 
     def post(self, request, format=None):
-        print(request.data)
         serializer = PictureAPISerializer(data=request.data)
         base_dir = str(BASE_DIR)
         if serializer.is_valid():
@@ -31,8 +30,6 @@ class RecognisePictureAPIView(APIView):
             img_encode = cv2.imencode('.png', rectangled_img)[1]
             data_encode = np.array(img_encode)
             byte_encode = data_encode.tobytes()
-            c = base64.b64encode(byte_encode)
-            print(base64.b64encode(byte_encode))
-            print(base64.b64decode(c).__class__)
+            print(recognised_letters)
             return Response({'letters': recognised_letters, 'new_img': base64.b64encode(byte_encode)})
         return Response({'answer': 'success'})
