@@ -7,6 +7,8 @@ import os
 
 model = load_model('letter_rec_new_v5.h5')
 
+dangerous_letters = ['C', 'c', 'I', 'i', 'O', 'o', 'S', 's', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Z', 'z']
+
 
 def get_picc(impath):  # outdated function
     out_size = 32
@@ -39,7 +41,6 @@ def get_letters_from_picture(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 3)
     conts, hier = cv2.findContours(thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    counter = 0
     biggest = 0
     letters = []
     for idx, item in enumerate(conts):
@@ -57,15 +58,11 @@ def get_letters_from_picture(img):
             letter_height = y + h
             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
             letter_crop = img_copy[y:y + h, x:x + w]
-            print(letter_height < float(current_height) + h / 3 and letter_height > float(current_height) - h)
             if not (letter_height < float(current_height) + h / 3 and letter_height > float(current_height) - h):
                 current_height = y + h
                 line += 1
-            letters.append((x, w, cv2.resize(letter_crop, (out_size, out_size)), line))
-#    letters.sort(key=lambda x: x[0])
+            letters.append((x, w, cv2.resize(letter_crop, (out_size, out_size)), line, h))
     new_letters = sort_letters_by(letters)
-    for item in letters:
-        print(item[3])
     return new_letters, img
 
 
@@ -73,7 +70,8 @@ def array_of_letters_to_str(letters):
     predicted = []
     list_of_letters = []
     x_prev = w_prev = None
-    avg_width = sum(map(lambda x: x[1], letters)) / len(letters)
+    avg_width = sum(map(lambda x: x[1], filter(lambda x: len(x) == 5, letters))) / len(letters)
+    avg_height = sum(map(lambda x: x[4], filter(lambda x: len(x) == 5, letters))) / len(letters)
     for i, letter in enumerate(letters):
         if all((x_prev, w_prev)) and letter[0] - (x_prev + w_prev) > avg_width / 4:
             list_of_letters.append(' ')
@@ -82,7 +80,16 @@ def array_of_letters_to_str(letters):
             continue
         pred = prediction(letter[2], model)
         predicted.append(pred)
-        list_of_letters.append(res_dir[pred + 10])
+        current_letter = res_dir[pred + 10]
+        if current_letter in dangerous_letters:
+            if letter[4] > avg_height:
+                if not (ord(current_letter) > ord('A') - 1 and ord(current_letter) < ord('Z') + 1):
+                    current_letter = res_dir[pred+10-26]
+            else:
+                if not (ord(current_letter) > ord('a') - 1 and ord(current_letter) < ord('z') + 1):
+                    current_letter = res_dir[pred+10+26]
+        #list_of_letters.append(res_dir[pred + 10])
+        list_of_letters.append(current_letter)
         x_prev, w_prev = letter[0], letter[1]
     return list_of_letters
 
@@ -95,7 +102,7 @@ def sort_letters_by(letters):
     while (line < max_line):
         part_of_letters = list(filter(lambda x: x[3] == line, letters))
         part_of_letters.sort(key=lambda x: x[0])
-        part_of_letters.append((-1, -1, "\n", -1))
+        part_of_letters.append((1, 1, "\n", 1))
         new_letters = part_of_letters + new_letters
         line += 1
     return new_letters

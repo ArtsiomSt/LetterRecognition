@@ -1,16 +1,17 @@
-import numpy as np
+import os
+import mimetypes
 from django.contrib.auth import authenticate, login, logout
 from django.core.files import File
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from .mixins import LoginRequiredRedirectMixin
 from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword, AddPictureForRecogintionForm
 from .models import UserProfile, PictureForRecongition
 import requests
-from converter.settings import MEDIA_ROOT, BASE_DIR
+from converter.settings import BASE_DIR, MEDIA_ROOT
 import base64
 import cv2
-import os
 import io
 
 
@@ -30,7 +31,7 @@ class HomePageView(LoginRequiredRedirectMixin, View):
             current_picture = PictureForRecongition.objects.create(
                 made_by_user=UserProfile.objects.get(user=request.user),
                 picture_file=form.cleaned_data['picture_file'])
-            media = str(BASE_DIR) + current_picture.picture_file.url.replace('/', '\\')
+            media = str(BASE_DIR) + current_picture.picture_file.url
             url = "http://127.0.0.1:8000/recpicture/api/v1/recognise/"
             payload = {}
             files = [('image', ('recognise.png', open(media, 'rb'), 'image/png'))]
@@ -157,3 +158,14 @@ class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
             cur_user.save()
         return redirect('profile')
 
+def download_pdf(request):
+    filename = 'img.png'
+    filepath = os.path.join(MEDIA_ROOT, filename)
+    with open(filepath, 'rb') as path:
+        try:
+            mime_type, _ = mimetypes.guess_type(filepath)
+            response = HttpResponse(path, content_type=mime_type)
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+        except:
+            return HttpResponse('Error while downloading file')
+    return response

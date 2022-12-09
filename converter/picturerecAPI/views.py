@@ -23,7 +23,7 @@ class RecognisePictureAPIView(APIView):
         base_dir = str(BASE_DIR)
         if serializer.is_valid():
             new_picture = serializer.save()
-            path_to_img = base_dir + new_picture.image.url.replace('/', '\\')
+            path_to_img = base_dir + new_picture.image.url
             img = cv2.imread(path_to_img)
             letters, rectangled_img = get_letters_from_picture(img)
             recognised_letters = array_of_letters_to_str(letters)
