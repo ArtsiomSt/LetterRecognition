@@ -37,7 +37,7 @@ def get_letters_from_picture(img):
     out_size = 32
     img_copy = deepcopy(img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 3)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 3)
     conts, hier = cv2.findContours(thresh, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     counter = 0
     biggest = 0
@@ -47,15 +47,26 @@ def get_letters_from_picture(img):
             biggest = idx
     areas = list(map(cv2.contourArea, sorted(conts, key=cv2.contourArea)[1:]))
     avg_area = sum(areas) / (10 * len(areas))
+    current_height = None
     for idx, item in enumerate(conts):
         x, y, w, h = cv2.boundingRect(item)
         if hier[0][idx][3] == biggest and cv2.contourArea(item) > avg_area:
-            counter += 1
+            if current_height is None:
+                current_height = y + h
+                line = 0
+            letter_height = y + h
             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
             letter_crop = img_copy[y:y + h, x:x + w]
-            letters.append((x, w, cv2.resize(letter_crop, (out_size, out_size))))
-    letters.sort(key=lambda x: x[0])
-    return letters, img
+            print(letter_height < float(current_height) + h / 3 and letter_height > float(current_height) - h)
+            if not (letter_height < float(current_height) + h / 3 and letter_height > float(current_height) - h):
+                current_height = y + h
+                line += 1
+            letters.append((x, w, cv2.resize(letter_crop, (out_size, out_size)), line))
+#    letters.sort(key=lambda x: x[0])
+    new_letters = sort_letters_by(letters)
+    for item in letters:
+        print(item[3])
+    return new_letters, img
 
 
 def array_of_letters_to_str(letters):
@@ -64,8 +75,11 @@ def array_of_letters_to_str(letters):
     x_prev = w_prev = None
     avg_width = sum(map(lambda x: x[1], letters)) / len(letters)
     for i, letter in enumerate(letters):
-        if all((x_prev, w_prev)) and letter[0]-(x_prev+w_prev) > avg_width/4:
+        if all((x_prev, w_prev)) and letter[0] - (x_prev + w_prev) > avg_width / 4:
             list_of_letters.append(' ')
+        if letter[2] == "\n":
+            list_of_letters.append("\n")
+            continue
         pred = prediction(letter[2], model)
         predicted.append(pred)
         list_of_letters.append(res_dir[pred + 10])
@@ -73,8 +87,19 @@ def array_of_letters_to_str(letters):
     return list_of_letters
 
 
-def sort_letters_by():
-    pass
+def sort_letters_by(letters):
+    max_line_element = max(letters, key=lambda x: x[3])
+    max_line = max_line_element[3] + 1
+    line = 0
+    new_letters = []
+    while (line < max_line):
+        part_of_letters = list(filter(lambda x: x[3] == line, letters))
+        part_of_letters.sort(key=lambda x: x[0])
+        part_of_letters.append((-1, -1, "\n", -1))
+        new_letters = part_of_letters + new_letters
+        line += 1
+    return new_letters
+
 
 def picture_to_one_letter(picture):
     letter = prediction(picture, model)
