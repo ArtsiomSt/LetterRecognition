@@ -182,9 +182,41 @@ class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
             cur_user.save()
         return redirect('profile')
 
+
 def download_pdf(request):
     filename = 'img.png'
     filepath = os.path.join(MEDIA_ROOT, filename)
+    with open(filepath, 'rb') as path:
+        try:
+            mime_type, _ = mimetypes.guess_type(filepath)
+            response = HttpResponse(path, content_type=mime_type)
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+        except:
+            return HttpResponse('Error while downloading file')
+    return response
+
+
+def download_file(request, filecode):  # filecode = str, where first value is id of image and the second value is file type
+    file_stats = filecode.split('_')
+    if len(file_stats) not in [2,3]:
+        print('1')
+        return redirect('home')
+    print(file_stats)
+    if not (file_stats[0].isdigit() and file_stats[1] in ['img']):
+        print('2')
+        return redirect('home')
+    user = UserProfile.objects.get(user=request.user)
+    image_for_download = user.pictureforrecongition_set.get(pk=int(file_stats[0]))
+    if file_stats[1] == 'img':
+        filename = 'img.png'
+        if file_stats[2] == 'co':
+            filepath = image_for_download.cleaned_opencv_image.url[1:]
+        elif file_stats[2] == 'ca':
+            filepath = image_for_download.autoencoded_image.url[1:]
+        else:
+            print('3')
+            return redirect('home')
+    print(filepath)
     with open(filepath, 'rb') as path:
         try:
             mime_type, _ = mimetypes.guess_type(filepath)

@@ -14,7 +14,7 @@ def clean_scaner(img):
     lines = get_lines_cords(letters)
     new_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     new_gray = cv2.blur(new_gray, (2, 2))
-    thresh = cv2.adaptiveThreshold(new_gray, 230, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 11)
+    thresh = cv2.adaptiveThreshold(new_gray, 230, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 9)
     make_space_between_lines_white(thresh, lines)
     make_small_contours_white(thresh)
     thresh = cv2.blur(thresh, (2, 2))

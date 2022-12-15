@@ -11,7 +11,8 @@ urlpatterns = [
     path('logout/', logout_user, name='logout'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('changeprofile/', ChangeProfileDataView.as_view(), name='changep'),
-    path('dowload/imgtest/', download_pdf, name='dtest')
+    path('dowload/imgtest/', download_pdf, name='dtest'),
+    path('downloas/<str:filecode>', download_file, name='download'),
 ]
 
 if DEBUG:
