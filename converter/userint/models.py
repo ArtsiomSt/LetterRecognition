@@ -19,4 +19,4 @@ class PictureForRecongition(models.Model):
     proccesed = models.BooleanField(default=False)
     rectangled_image = models.ImageField(upload_to='rectangled/%Y/%m/%d', null=True, blank=True, max_length=300)
     cleaned_opencv_image = models.ImageField(upload_to='cleaned/%Y/%m/%d', null=True, blank=True)
-
+    autoencoded_image = models.ImageField(upload_to='autoencoded/%Y', null=True, blank=True)

@@ -6,8 +6,11 @@ import numpy as np
 def clean_scaner(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 17)
-    letters, _ = get_letters_from_picture_modern(thresh)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 5)
+    # cv2.imshow(thresh)
+    letters, test = get_letters_from_picture_modern(thresh)
+    # cv2.imshow('11', test)
+    # cv2.waitKey(0)
     lines = get_lines_cords(letters)
     new_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     new_gray = cv2.blur(new_gray, (2, 2))

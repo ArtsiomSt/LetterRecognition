@@ -12,12 +12,19 @@
     <button type="submit">Recognise</button>
 </form>
 {% endif %}
+{% if current_picture %}
 <img src="{{ current_picture.picture_file.url }}" alt="">
 <hr>
-{% if current_picture.rectangled_image %}
-<img src="{{ current_picture.rectangled_image.url }}" alt="">
+{% if current_picture.cleaned_opencv_image %}
+<h2>OpenCV cleaning</h2>
+<img src="{{ current_picture.cleaned_opencv_image.url }}" alt="">
 <hr>
-<h3>{{ current_picture.recognised_text }}</h3>
+{% endif %}
+{% if current_picture.autoencoded_image %}
+<h2>Autoencoder</h2>
+<img src="{{ current_picture.autoencoded_image.url }}" alt="">
+<hr>
 {% endif %}
 <a href="{% url 'dtest' %}"><button>Test download</button></a>
+{% endif %}
 {% endblock  %}
