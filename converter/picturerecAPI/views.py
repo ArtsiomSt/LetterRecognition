@@ -1,3 +1,4 @@
+from copy import deepcopy
 from .functions_for_images.funcs_for_rec import get_letters_from_picture, array_of_letters_to_str
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -8,8 +9,8 @@ from converter.settings import BASE_DIR
 import os
 import cv2
 import numpy as np
-import json
 import base64
+from .functions_for_images.opencv_cleaner import clean_scaner
 
 
 class RecognisePictureAPIView(APIView):
@@ -25,11 +26,17 @@ class RecognisePictureAPIView(APIView):
             new_picture = serializer.save()
             path_to_img = base_dir + new_picture.image.url
             img = cv2.imread(path_to_img)
-            letters, rectangled_img = get_letters_from_picture(img)
+            cleaned_opencv_image = clean_scaner(img)
+            cleaned_opencv_image_copy = deepcopy(cleaned_opencv_image)
+            letters, rectangled_img = get_letters_from_picture(cleaned_opencv_image_copy)
             recognised_letters = array_of_letters_to_str(letters)
-            img_encode = cv2.imencode('.png', rectangled_img)[1]
-            data_encode = np.array(img_encode)
-            byte_encode = data_encode.tobytes()
-            print(recognised_letters)
-            return Response({'letters': recognised_letters, 'new_img': base64.b64encode(byte_encode)})
+            rect_img_encode = cv2.imencode('.png', rectangled_img)[1]
+            rect_data_encode = np.array(rect_img_encode)
+            rect_byte_encode = rect_data_encode.tobytes()
+            cleaned_opencv_image_encode = cv2.imencode('.png', cleaned_opencv_image)[1]
+            cleaned_opencv_data_encode = np.array(cleaned_opencv_image_encode)
+            cleaned_opencv_byte_encode = cleaned_opencv_data_encode.tobytes()
+            return Response({'letters': recognised_letters,
+                             'new_img': base64.b64encode(rect_byte_encode),
+                             'cleaned_img': base64.b64encode(cleaned_opencv_byte_encode)})
         return Response({'answer': 'success'})

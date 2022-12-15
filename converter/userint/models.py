@@ -18,4 +18,5 @@ class PictureForRecongition(models.Model):
     recognised_text = models.TextField(blank=True, null=True, default='')
     proccesed = models.BooleanField(default=False)
     rectangled_image = models.ImageField(upload_to='rectangled/%Y/%m/%d', null=True, blank=True, max_length=300)
+    cleaned_opencv_image = models.ImageField(upload_to='cleaned/%Y/%m/%d', null=True, blank=True)
 

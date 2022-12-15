@@ -5,7 +5,7 @@ import numpy as np
 from keras.constraints import maxnorm
 from keras.layers import Convolution2D, MaxPooling2D, Dropout, Flatten, Dense, Conv2D, Activation, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
-import scipy
+
 
 
 
