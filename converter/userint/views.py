@@ -20,7 +20,7 @@ class HomePageView(LoginRequiredRedirectMixin, View):
         form = AddPictureForRecogintionForm()
         context = {
             'form': form,
-            'title': 'Homepage'
+            'title': 'Homepage',
         }
         return render(request, 'userint/homepage.html', context=context)
 
@@ -43,7 +43,6 @@ class HomePageView(LoginRequiredRedirectMixin, View):
             cleaned_image_opencv = resp.json().get('cleaned_img', None)
             text_from_picture = resp.json().get('letters', None)
             autoencoded_image = resp.json().get('autoencoded_img', None)
-            print(autoencoded_image)
 
             if image_code is not None:
                 image_decode = base64.b64decode(image_code)
@@ -54,7 +53,7 @@ class HomePageView(LoginRequiredRedirectMixin, View):
                 current_picture.rectangled_image = rectangled_image_file
 
             if text_from_picture is not None:
-                current_picture.recognised_text = ''.join(text_from_picture)
+                current_picture.recognised_text = text_from_picture
 
             if cleaned_image_opencv is not None:
                 cleaned_image_decode = base64.b64decode(cleaned_image_opencv)
@@ -76,6 +75,8 @@ class HomePageView(LoginRequiredRedirectMixin, View):
             context = {
                 'title': 'Homepage',
                 'current_picture': current_picture,
+                'opencvimage_code': f'{current_picture.pk}_img_co',
+                'autoencoded_code': f'{current_picture.pk}_img_ca',
             }
             return render(request, 'userint/homepage.html', context=context)
         return redirect('/?Error')
