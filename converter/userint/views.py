@@ -27,12 +27,11 @@ class HomePageView(LoginRequiredRedirectMixin, View):
     def post(self, request):
         form = AddPictureForRecogintionForm(request.POST, request.FILES)
         if form.is_valid():
-            print(form.cleaned_data['picture_file'].__class__)
             current_picture = PictureForRecongition.objects.create(
                 made_by_user=UserProfile.objects.get(user=request.user),
                 picture_file=form.cleaned_data['picture_file'])
 
-            media = str(BASE_DIR) + current_picture.picture_file.url
+            media = current_picture.picture_file.url[1:]
             url = "http://127.0.0.1:8000/recpicture/api/v1/recognise/"
             payload = {}
             files = [('image', ('recognise.png', open(media, 'rb'), 'image/png'))]

@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import os
 
+# this network is worse than pytesseract :(
+# so it wont be used in this project :(((
+
 
 def prediction(img, model):
     if 'temp_files' not in os.listdir():

@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import ImageSerializer, PictureAPISerializer
 from .models import PictureForRecognising
-from converter.settings import BASE_DIR
 from PIL import Image
 import cv2
 import numpy as np
@@ -27,10 +26,9 @@ class RecognisePictureAPIView(APIView):
 
     def post(self, request, format=None):
         serializer = PictureAPISerializer(data=request.data)
-        base_dir = str(BASE_DIR)
         if serializer.is_valid():
             new_picture = serializer.save()
-            path_to_img = base_dir + new_picture.image.url
+            path_to_img = new_picture.image.url[1:]
             img = cv2.imread(path_to_img)
 
             cleaned_opencv_image = clean_scaner(img)
@@ -54,7 +52,8 @@ class RecognisePictureAPIView(APIView):
             pil_img = pil_img.convert('RGB')
             text_from_image = pytesseract.image_to_string(pil_img, lang='eng')
 
-
+            new_picture.image.delete(save=True)
+            new_picture.delete()
             return Response({'letters': text_from_image,
                              'new_img': base64.b64encode(rect_byte_encode),
                              'cleaned_img': base64.b64encode(cleaned_opencv_byte_encode),
