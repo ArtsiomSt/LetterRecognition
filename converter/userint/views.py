@@ -11,12 +11,16 @@ from .models import UserProfile, PictureForRecongition
 import requests
 from converter.settings import BASE_DIR, MEDIA_ROOT
 import base64
-import cv2
 import io
+import logging
+
+
+logger = logging.getLogger('main')
 
 
 class HomePageView(LoginRequiredRedirectMixin, View):
     def get(self, request):
+        logger.info("User got in handling page")
         form = AddPictureForRecogintionForm()
         context = {
             'form': form,
