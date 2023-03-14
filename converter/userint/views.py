@@ -1,18 +1,19 @@
-import os
-import mimetypes
 from django.contrib.auth import authenticate, login, logout
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
+
 from .mixins import LoginRequiredRedirectMixin
 from .forms import LoginForm, RegisterForm, ChangeUserProfileDataForm, SetNewPassword, AddPictureForRecogintionForm
 from .models import UserProfile, PictureForRecongition
-import requests
 from converter.settings import BASE_DIR, MEDIA_ROOT
+
+import requests
 import base64
-import cv2
 import io
+import os
+import mimetypes
 
 
 class HomePageView(LoginRequiredRedirectMixin, View):
@@ -157,6 +158,7 @@ class ChangeProfileDataView(LoginRequiredRedirectMixin, View):
             cur_user.user.save()
             cur_user.save()
         return redirect('profile')
+
 
 def download_pdf(request):
     filename = 'img.png'

@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'userint',
-    'picturerecAPI',
+    'letter_recognition',
     'rest_framework',
     'rest_framework.authtoken',
 ]

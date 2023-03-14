@@ -1,9 +1,13 @@
 from copy import deepcopy
 import cv2
-from .neiro_predict import prediction
-from keras.models import load_model
-from .rename_fnt import res, res_dir
 import os
+import numpy as np
+from keras.models import load_model
+
+
+from .neiro_predict import prediction
+from .rename_fnt import res, res_dir
+
 
 model = load_model('letter_rec_new_v5.h5')
 
@@ -32,8 +36,6 @@ def get_picc(impath):  # outdated function
     cv2.waitKey(0)
     return letters
 
-
-#    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 3)
 
 def get_letters_from_picture(img):
     out_size = 32
@@ -122,5 +124,11 @@ def letters_to_file(letters):
     return
 
 
-def get_text_from_picture(img):  # function that will give text direcly from image, without other info
-    pass
+def get_text_from_picture(img_path):  # function that will give text direcly from image, without other info
+        img = cv2.imread(img_path)
+        letters, rectangled_img = get_letters_from_picture(img)
+        recognised_letters = array_of_letters_to_str(letters)
+        img_encode = cv2.imencode('.png', rectangled_img)[1]
+        data_encode = np.array(img_encode)
+        byte_encode = data_encode.tobytes()
+        return byte_encode, recognised_letters
