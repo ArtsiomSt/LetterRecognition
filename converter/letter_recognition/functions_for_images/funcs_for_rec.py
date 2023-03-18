@@ -88,12 +88,6 @@ def sort_letters_by(letters):
     return new_letters
 
 
-def picture_to_one_letter(picture):
-    letter = prediction(picture, model)
-    print(letter)
-    return res_dir[letter]
-
-
 def letters_to_file(letters):
     counter = 0
     for img in letters:
