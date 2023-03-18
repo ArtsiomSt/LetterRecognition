@@ -11,33 +11,11 @@ from .rename_fnt import res, res_dir
 
 model = load_model('letter_rec_new_v5.h5')
 
-dangerous_letters = ['C', 'c', 'I', 'i', 'O', 'o', 'S', 's', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Z', 'z']
+dangerous_letters = ['C', 'c', 'I', 'i', 'O', 'o', 'S', 's', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Z', 'z'] # letters that are similar when they are small or big
 
 
-def get_picc(impath):  # outdated function
-    out_size = 32
-    image_file = f"{impath}"
-    img = cv2.imread(image_file)
-    img_copy = cv2.imread(image_file)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    conts = sorted(contours, key=cv2.contourArea, reverse=True)
-    letters = []
-    for idx, item in enumerate(conts):
-        x, y, w, h = cv2.boundingRect(item)
-        if hierarchy[0][idx][3] == 0:
-            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            letter_crop = img_copy[y:y + h, x:x + w]
-            print(cv2.contourArea(item))
-            letters.append((x, y, cv2.resize(letter_crop, (out_size, out_size))))
-    letters.sort(key=lambda x: x[0])
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    return letters
 
-
-def get_letters_from_picture(img):
+def get_letters_from_picture(img): # return array of letters(with their position) and img with visualized result of cutting those letters
     out_size = 32
     img_copy = deepcopy(img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -124,7 +102,7 @@ def letters_to_file(letters):
     return
 
 
-def get_text_from_picture(img_path):  # function that will give text direcly from image, without other info
+def get_text_from_picture(img_path):  # function that predict text direcly from image, without other info
         img = cv2.imread(img_path)
         letters, rectangled_img = get_letters_from_picture(img)
         recognised_letters = array_of_letters_to_str(letters)
